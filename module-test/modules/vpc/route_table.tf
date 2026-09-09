@@ -37,6 +37,6 @@ resource "aws_route_table" "this" {
     vpc_id = aws_vpc.this.id
 
     tags = {
-        Name = "${replace("_", "-", each.key)}"
+        Name = replace(each.key, "_", "-")
     }
 }
