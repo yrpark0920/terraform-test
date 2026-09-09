@@ -40,6 +40,23 @@ resource "aws_subnet" "this" {
 }
 
 ## 목적별 서브넷 변수 생성 (해당 결과값이 없을 경우 빈 맵으로 생성)
+/*
+> module.dev_vpc.public_subnet_information
+{
+  "yrpark_pub_subnet_a" = {
+    "az" = "a"
+    "is_public" = true
+    "name" = "yrpark_pub_subnet"
+    "subnet_cidr" = "10.0.0.0/24"
+  }
+  "yrpark_pub_subnet_b" = {
+    "az" = "b"
+    "is_public" = true
+    "name" = "yrpark_pub_subnet"
+    "subnet_cidr" = "10.0.1.0/24"
+  }
+}
+*/
 locals {
     public_subnet_information = { 
         for k,v in local.subnet_information : k => v 
