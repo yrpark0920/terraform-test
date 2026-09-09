@@ -40,3 +40,13 @@ resource "aws_route_table" "this" {
         Name = replace(each.key, "_", "-")
     }
 }
+
+
+############################ Associate Subnet <-> RouteTable ############################
+resource "aws_route_table_association" "this" {
+    for_each = local.rt_information 
+
+    subnet_id = aws_subnet.this[each.value.target_subnet].id
+    route_table_id = aws_route_table.this[each.key].id
+
+}
