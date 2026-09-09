@@ -45,4 +45,7 @@ module "dev_vpc" {
     ## NAT 변수 지정
     create_ngw_strategy = "per_az"
 
+    ## NAT 라우팅 추가할 그룹 지정
+    allow_nat_route_subnet = ["eks"]
+
 } // module.dev_vpc

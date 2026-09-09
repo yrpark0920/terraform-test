@@ -39,3 +39,15 @@ variable "create_ngw_strategy" {
         error_message = "[none, single, per_az] 중에서 선택하셔야 합니다."
     }
 }
+
+variable "allow_nat_route_subnet" {
+    description = "NAT 라우팅 경로를 추가할 서브넷 그룹 지정"
+    type = list(string)
+
+    validation {
+        condition = alltrue([
+            for subnet in var.allow_nat_route_subnet : contains(["eks", "pri", "db"], subnet)
+        ])
+        error_message = "[eks, pri, db] 중에서 선택하셔야 합니다."
+    }
+}
