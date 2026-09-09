@@ -50,3 +50,19 @@ resource "aws_route_table_association" "this" {
     route_table_id = aws_route_table.this[each.key].id
 
 }
+
+############################ Add Routing into Route Table ############################
+## IGW 경로
+locals {
+    public_rt_information = {
+        for k,v in local.rt_information : k => v if(strcontains(k, "pub"))
+    }
+}
+
+resource "aws_route" "igw" {
+    for_each = local.public_rt_information
+
+    route_table_id = aws_route_table.this[each.key].id
+    destination_cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.this[0].id 
+}
