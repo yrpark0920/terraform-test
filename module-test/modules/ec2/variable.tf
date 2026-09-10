@@ -4,6 +4,11 @@ variable "is_public" {
     default = false
 }
 
+variable "key_pair_name" {
+    description = "생성할 key pair 이름"
+    type = string
+}
+
 variable "instance_name" {
     description = "생성할 인스턴스 이름" 
     type = string
