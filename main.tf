@@ -53,6 +53,8 @@ module "dev_vpc" {
 module "dev_bastion" {
   source = "./modules/ec2"
 
+  is_public = true
+
   instance_name = "yrpark_dev_bastion"
   instance_subnet = "yrpark_pub_subnet"
   instance_subnet_az = ["a"] 
