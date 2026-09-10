@@ -1,3 +1,9 @@
+variable "is_public" {
+    description = "EIP 생성 필요 여부"
+    type = boolean 
+    default = false
+}
+
 variable "instance_name" {
     description = "생성할 인스턴스 이름" 
     type = string
