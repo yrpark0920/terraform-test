@@ -52,7 +52,7 @@ variable "volume_size" {
 
 variable "sg_ingress_rules" {
     description = "보안그룹에 추가할 인바운드 목록"
-    type = list(object{
+    type = map(object{
         from_port = number
         to_port = number
         protocol = string 
@@ -63,7 +63,7 @@ variable "sg_ingress_rules" {
 
 variable "sg_egress_rules" {
     description = "보안그룹에 추가할 아웃바운드 목록"
-    type = list(object{
+    type = map(object{
         from_port = number
         to_port = number
         protocol = string 
