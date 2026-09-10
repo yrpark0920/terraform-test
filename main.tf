@@ -54,6 +54,7 @@ module "dev_bastion" {
   source = "./modules/ec2"
 
   is_public = true
+  key_pair_name = "yrpark-dev-key-pair"
 
   instance_name = "yrpark_dev_bastion"
   instance_subnet = "yrpark_pub_subnet"
@@ -86,4 +87,4 @@ module "dev_bastion" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-}
+} module.dev_bastion
