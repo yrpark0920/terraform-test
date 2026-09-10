@@ -49,3 +49,39 @@ module "dev_vpc" {
     allow_nat_route_subnet = ["eks"]
 
 } // module.dev_vpc
+
+module "dev_bastion" {
+  source = "./modules/ec2"
+
+  instance_name = "yrpark_dev_bastion"
+  instance_subnet = "yrpark_pub_subnet"
+  instance_subnet_az = ["a"] 
+
+  instance_ami = "amazon_linux_2023"
+  instance_type = "t3.micro"
+  volume_type = "gp3"
+  volume_size = 10
+
+  instance_security_group = "yrpark_dev_bastion_sg"
+
+  ## 인바운드 규칙 설정
+  sg_ingress_rules = {
+    "http" = {
+      from_port = 80
+      to_port = 80
+      protocol = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+      # source_security_group_ids = []
+    }
+  }
+
+  ## 아웃바운드 규칙 설정
+  sg_egress_rules = {
+    "outbound_default" = {
+      from_port = 0
+      to_port = 0
+      protocol = -1
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+}
