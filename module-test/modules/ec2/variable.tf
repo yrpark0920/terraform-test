@@ -4,6 +4,11 @@ variable "is_public" {
     default = false
 }
 
+variable "vpc_id" {
+    description = "기준이 되는 VPC ID 지정"
+    type = string
+}
+
 variable "key_pair_name" {
     description = "생성할 key pair 이름"
     type = string
@@ -63,22 +68,24 @@ variable "volume_size" {
 
 variable "sg_ingress_rules" {
     description = "보안그룹에 추가할 인바운드 목록"
-    type = map(object{
+    type = map(object({
         from_port = number
         to_port = number
         protocol = string 
         cidr_blocks = optional(list(string))
-        source_security_group_ids = optional(list(string))
+        source_security_group_id = optional(string)
     })
+    )
 }
 
 variable "sg_egress_rules" {
     description = "보안그룹에 추가할 아웃바운드 목록"
-    type = map(object{
+    type = map(object({
         from_port = number
         to_port = number
         protocol = string 
         cidr_blocks = optional(list(string))
-        source_security_group_ids = optional(list(string))
+        source_security_group_id = optional(string)
     })
+    )
 }

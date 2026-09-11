@@ -52,6 +52,7 @@ module "dev_vpc" {
 
 module "dev_bastion" {
   source = "./modules/ec2"
+  vpc_id = module.dev_vpc.vpc_id
 
   is_public = true
   key_pair_name = "yrpark-dev-key-pair"
@@ -74,7 +75,7 @@ module "dev_bastion" {
       to_port = 80
       protocol = "tcp"
       cidr_blocks = ["0.0.0.0/0"]
-      # source_security_group_ids = []
+      # source_security_group_id = []
     }
   }
 
@@ -87,4 +88,4 @@ module "dev_bastion" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-} module.dev_bastion
+} // module.dev_bastion
