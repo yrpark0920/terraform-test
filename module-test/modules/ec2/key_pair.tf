@@ -5,7 +5,7 @@ resource "tls_private_key" "this" {
 
 ## 키페어 생성
 resource "aws_key_pair" "this" {
-    key_name = "${var.key_pair_name}-key-pair"
+    key_name = "${var.key_pair_name}"
     public_key = tls_private_key.this.public_key_openssh
 }
 
