@@ -54,11 +54,7 @@ module "dev_bastion" {
   source = "./modules/ec2"
 
   is_public = true
-<<<<<<< HEAD
-  key_pair_name = "yrpark-dev-vpc-key"
-=======
   key_pair_name = "yrpark-dev-key-pair"
->>>>>>> 26cf49cb3404434a3cf43ac308c222c4f615517d
   subnet_ids = module.dev_vpc.subnet_ids
 
   instance_name = "yrpark_dev_bastion"
