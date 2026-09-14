@@ -1,7 +1,7 @@
 ############################ Create for Security Group ############################
 resource "aws_security_group" "this" {
-  name        = var.instance_security_group
-  description = "Allow TLS inbound traffic and all outbound traffic"
+  name        = security_group_name
+  description = var.security_group_description
   vpc_id      = var.vpc_id
 
   tags = {

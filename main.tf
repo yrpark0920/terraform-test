@@ -52,10 +52,10 @@ module "dev_vpc" {
 
 module "dev_bastion" {
   source = "./modules/ec2"
-  vpc_id = module.dev_vpc.vpc_id
 
   is_public = true
   key_pair_name = "yrpark-dev-key-pair"
+  subnet_ids = module.dev_vpc.subnet_ids
 
   instance_name = "yrpark_dev_bastion"
   instance_subnet = "yrpark_pub_subnet"
@@ -66,7 +66,18 @@ module "dev_bastion" {
   volume_type = "gp3"
   volume_size = 10
 
-  instance_security_group = "yrpark_dev_bastion_sg"
+  instance_security_groups = [module.dev_bastion_sg.sg_id]
+
+  # iam_instance_profile = ""
+} // module.dev_bastion
+
+
+module "dev_bastion_sg" {
+  source = "./modules/security_group"
+  vpc_id = module.dev_vpc.vpc_id
+
+  security_group_name = "yrpark_dev_bastion_sg"
+  #security_group_description = ""
 
   ## 인바운드 규칙 설정
   sg_ingress_rules = {
@@ -88,4 +99,4 @@ module "dev_bastion" {
       cidr_blocks = ["0.0.0.0/0"]
     }
   }
-} // module.dev_bastion
+} //module.dev_bastion_sg

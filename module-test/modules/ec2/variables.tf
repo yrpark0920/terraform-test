@@ -1,17 +1,17 @@
 variable "is_public" {
     description = "EIP 생성 필요 여부"
-    type = boolean 
+    type = bool
     default = false
-}
-
-variable "vpc_id" {
-    description = "기준이 되는 VPC ID 지정"
-    type = string
 }
 
 variable "key_pair_name" {
     description = "생성할 key pair 이름"
     type = string
+}
+
+variable "subnet_ids" {
+    description = "서브넷 ID 가져올 module 지정"
+    type = map(string)
 }
 
 variable "instance_name" {
@@ -29,9 +29,9 @@ variable "instance_subnet_az" {
     type = list(string)
 }
 
-variable "instance_security_group" {
+variable "instance_security_groups" {
     description = "인스턴스의 보안 그룹 지정"
-    type = string 
+    type = list(string)
 }
 
 variable "instance_ami" {
@@ -40,7 +40,7 @@ variable "instance_ami" {
 
     validation {
         condition = contains(["amazon_linux_2023", "ubuntu"], var.instance_ami)
-        error_message = "현재 ["amazon_linux_2023", "ubuntu"] 중에서 선택 가능합니다."
+        error_message = "현재 [amazon_linux_2023, ubuntu] 중에서 선택 가능합니다."
     }
 }
 
@@ -51,7 +51,7 @@ variable "instance_type" {
 
 variable "volume_type" {
     description = "인스턴스 볼륨 타입 지정"
-    type = optional(string)
+    type = string
     default = "gp3"
 }
 
@@ -66,26 +66,9 @@ variable "volume_size" {
     
 }
 
-variable "sg_ingress_rules" {
-    description = "보안그룹에 추가할 인바운드 목록"
-    type = map(object({
-        from_port = number
-        to_port = number
-        protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
-    })
-    )
+variable "iam_instance_profile" {
+    description = "EC2에게 지정할 IAM Role" 
+    type = string 
+    default = null
 }
 
-variable "sg_egress_rules" {
-    description = "보안그룹에 추가할 아웃바운드 목록"
-    type = map(object({
-        from_port = number
-        to_port = number
-        protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
-    })
-    )
-}
