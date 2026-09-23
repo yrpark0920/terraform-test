@@ -135,4 +135,22 @@ module "dev_eks" {
       max_size = 1
     }
   } // variable "node_groups"
+
+  ## EKS Addon 
+  cluster_addons = {
+    "vpc-cni" = {
+      version = "v1.22.4-eksbuild.3"
+    }
+    "kube-proxy" = {
+      version = "v1.36.0-eksbuild.25"
+    }
+    "coredns" = {
+      version = "v1.14.3-eksbuild.23"
+    }
+    "aws-ebs-csi-driver" = {
+      version = "v1.66.0-eksbuild.1"
+      serviceaccount = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+      attach_policy = ["AmazonEBSCSIDriverPolicy"]
+    }
+  } //cluster_addons
 }

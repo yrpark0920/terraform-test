@@ -73,3 +73,13 @@ variable "node_group_information" {
         max_size = number
     }))
 }
+
+############################# Add AddOn #############################
+variable "cluster_addons" {
+    desciption = "EKS 클러스터에 추가할 기능"
+    type = map(object({
+        version = string
+        serviceaccount = optional(string, null)
+        attach_policy = optional(list(string), null)
+    }))
+}

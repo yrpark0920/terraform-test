@@ -61,3 +61,32 @@ resource "aws_eks_node_group" "this" {
         aws_iam_role_policy_attachment.eks_nodegroup_policy["AmazonEC2ContainerRegistryReadOnly"]
     ]
 }
+
+
+############################# Add AddOn #############################
+locals {
+    cluster_addons = var.cluster_addons
+}
+
+resource "aws_eks_addon" "this" {
+    for_each = local.cluster_addons
+
+    cluster_name = aws_eks_cluster.this.name 
+    addon_name = each.key 
+    addon_version = each.value.version 
+    resolve_conflicts_on_create = "OVERWRITE"
+    resolve_conflicts_on_update = "OVERWRITE"
+
+    configuration_values = jsonencode({
+        resources = {
+            limits = {
+                cpu = "200m"
+                memory = "256Mi"
+            }
+            requests = {
+                cpu = "100m"
+                memory = "128Mi"
+            }
+        }
+    })
+}
