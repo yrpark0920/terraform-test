@@ -90,7 +90,10 @@ resource "aws_instance" "this" {
     encrypted  = false
   }
 
-
+  lifecycle {
+    ignore_changes = [ami]
+  }
+  
     tags = {
         Name = replace(each.key, "_", "-")
     }

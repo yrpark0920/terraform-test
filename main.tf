@@ -100,3 +100,57 @@ module "dev_bastion_sg" {
     }
   }
 } //module.dev_bastion_sg
+
+module "dev_eks" {
+  source "./modules/eks"
+  subnet_ids = module.dev_vpc.subnet_ids 
+
+  ## Cluster 변수 설정
+  eks_cluster_name = "yraprk_dev_eks_cluster"
+  # eks_cluster_add_policy = [""]
+  eks_cluster_version = "1.36"
+  eks_cluster_endpoint = "private"
+  authentication_mode = "API_AND_CONFIG_MAP"
+  eks_cluster_subnet = "yrpark_eks_subnet"
+  eks_cluster_subnet_az = ["a", "b"]
+
+  ## NodeGroup 변수 설정
+  # eks_nodegroup_add_policy = [""]
+  
+  node_group_information = {
+    "mgmt" = {
+      instance_types = ["t3.large"]
+      capacity_type = "ON_DEMAND"
+      disk_size = 30
+      desired_size = 1
+      min_size = 0
+      max_size = 2
+    },
+    "app" = {
+      instance_types = ["t3.medium"]
+      capacity_type = "ON_DEMAND"
+      disk_size = 20 
+      desired_size = 1 
+      min_size = 0
+      max_size = 1
+    }
+  } // variable "node_groups"
+
+  ## EKS Addon 
+  cluster_addons = {
+    "vpc-cni" = {
+      version = "v1.22.4-eksbuild.3"
+    }
+    "kube-proxy" = {
+      version = "v1.36.0-eksbuild.25"
+    }
+    "coredns" = {
+      version = "v1.14.3-eksbuild.23"
+    }
+    "aws-ebs-csi-driver" = {
+      version = "v1.66.0-eksbuild.1"
+      serviceaccount = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+      attach_policy = ["service-role/AmazonEBSCSIDriverPolicy"]
+    }
+  } //cluster_addons
+}
