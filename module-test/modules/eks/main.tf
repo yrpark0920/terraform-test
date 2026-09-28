@@ -65,7 +65,48 @@ resource "aws_eks_node_group" "this" {
 
 ############################# Add AddOn #############################
 locals {
-    cluster_addons = var.cluster_addons
+    controller_configuration_values = jsonencode({
+    controller = {
+      resources = {
+        limits = {
+          cpu    = "100m"
+          memory = "150Mi"
+        }
+        requests = {
+          cpu    = "100m"
+          memory = "150Mi"
+        }
+      }
+    }
+  })
+
+    default_configuration_values = jsonencode({
+    resources = {
+      limits = {
+        cpu    = "200m"
+        memory = "256Mi"
+      }
+      requests = {
+        cpu    = "100m"
+        memory = "128Mi"
+      }
+    }
+  })
+
+    ## Addon별로 configuration 매핑 Map (최종)
+    addon_config_map = {
+        "vpc-cni" = local.default_configuration_values
+        "kube-proxy" = local.default_configuration_values
+        "coredns" = local.default_configuration_values
+        "aws-ebs-csi-driver" = local.controller_configuration_values
+    }
+
+    ## Addon별로 configuration 항목 추가 
+    cluster_addons = {
+        for k,v in var.cluster_addons : k => merge(v, {
+            configuration_values = lookup(local.addon_config_map, k, null)
+        })
+    }
 }
 
 resource "aws_eks_addon" "this" {
@@ -77,16 +118,7 @@ resource "aws_eks_addon" "this" {
     resolve_conflicts_on_create = "OVERWRITE"
     resolve_conflicts_on_update = "OVERWRITE"
 
-    configuration_values = jsonencode({
-        resources = {
-            limits = {
-                cpu = "200m"
-                memory = "256Mi"
-            }
-            requests = {
-                cpu = "100m"
-                memory = "128Mi"
-            }
-        }
-    })
+    service_account_role_arn = try(aws_iam_role.eks_addon[each.key].arn, null)
+
+    configuration_values = each.value.configuration_values
 }

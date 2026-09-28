@@ -150,7 +150,7 @@ module "dev_eks" {
     "aws-ebs-csi-driver" = {
       version = "v1.66.0-eksbuild.1"
       serviceaccount = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-      attach_policy = ["AmazonEBSCSIDriverPolicy"]
+      attach_policy = ["service-role/AmazonEBSCSIDriverPolicy"]
     }
   } //cluster_addons
 }
