@@ -125,8 +125,12 @@ resource "aws_eks_addon" "this" {
 
 ############################# Add Access #############################
 /*
-> module.dev_eks.result
+> local.eks_access_information
 {
+  "bastion-ec2-role" = {
+    "policy" = "EKSClusterAdminPolicy"
+    "target" = "arn:aws:iam::024732177529:role/bastion-ec2-role"
+  }
   "yrpark@ensmart.co.kr" = {
     "policy" = "AmazonEKSAdminViewPolicy"
     "target" = "arn:aws:iam::024732177529:user/yrpark@ensmart.co.kr"
@@ -141,7 +145,14 @@ locals {
         }
     }   
 
-    eks_access_information = merge(local.eks_admin_policy_target, {})
+    eks_cluster_admin_policy_target = {
+      for target in var.eks_cluster_access : target => {
+        target = (strcontains(target, "@")) ? "arn:aws:iam::024732177529:user/${target}" : "arn:aws:iam::024732177529:role/${target}"
+        policy = "AmazonEKSClusterAdminPolicy"
+      }
+    }
+
+    eks_access_information = merge(local.eks_admin_policy_target, local.eks_cluster_admin_policy_target)
 }
 
 resource "aws_eks_access_entry" "this" {

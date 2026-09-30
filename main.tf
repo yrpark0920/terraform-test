@@ -156,4 +156,5 @@ module "dev_eks" {
 
   ## EKS Access 
   eks_console_access = ["yrpark@ensmart.co.kr"]  # EKSAdminViewPolicy 부여
+  eks_cluster_access = [module.dev_bastion.bastion_ec2_role]  # AmazonEKSClusterAdminPolicy 부여
 }

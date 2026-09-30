@@ -86,6 +86,11 @@ variable "cluster_addons" {
 
 ############################ Add EKS Access ############################
 variable "eks_console_access" {
-    description = "EKS 클러스터에 액세스 할 계정 정보 또는 IAM Role 입력"
+    description = "EKS 클러스터에 액세스 할 수 있도록 EKSAdminViewPolicy 권한 부여할 계정 정보 또는 IAM Role 입력"
+    type = list(string)
+}
+
+variable "eks_cluster_access" {
+    description = "EKS 클러스터에 액세스 할 수 있도록 EKSClusterAdminPolicy 권한 부여할 계정 정보 또는 IAM Role 입력"
     type = list(string)
 }
