@@ -68,7 +68,7 @@ module "dev_bastion" {
 
   instance_security_groups = [module.dev_bastion_sg.sg_id]
 
-  # iam_instance_profile = ""
+  iam_instance_profile_policy = ["AmazonEKSWorkerNodePolicy"]  # default는 null
 } // module.dev_bastion
 
 

@@ -66,9 +66,9 @@ variable "volume_size" {
     
 }
 
-variable "iam_instance_profile" {
-    description = "EC2에게 지정할 IAM Role" 
-    type = string 
+variable "iam_instance_profile_policy" {
+    description = "EC2에게 지정할 IAM Role에 필요한 Policy 목록" 
+    type = list(string)
     default = null
 }
 
