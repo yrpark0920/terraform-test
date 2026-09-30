@@ -83,3 +83,9 @@ variable "cluster_addons" {
         attach_policy = optional(list(string))
     }))
 }
+
+############################ Add EKS Access ############################
+variable "eks_console_access" {
+    description = "EKS 클러스터에 액세스 할 계정 정보 또는 IAM Role 입력"
+    type = list(string)
+}

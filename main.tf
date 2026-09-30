@@ -153,4 +153,7 @@ module "dev_eks" {
       attach_policy = ["service-role/AmazonEBSCSIDriverPolicy"]
     }
   } //cluster_addons
+
+  ## EKS Access 
+  eks_console_access = ["yrpark@ensmart.co.kr"]  # EKSAdminViewPolicy 부여
 }

@@ -122,3 +122,44 @@ resource "aws_eks_addon" "this" {
 
     configuration_values = each.value.configuration_values
 }
+
+############################# Add Access #############################
+/*
+> module.dev_eks.result
+{
+  "yrpark@ensmart.co.kr" = {
+    "policy" = "AmazonEKSAdminViewPolicy"
+    "target" = "arn:aws:iam::024732177529:user/yrpark@ensmart.co.kr"
+  }
+}
+*/
+locals {
+    eks_admin_policy_target = {
+        for target in var.eks_console_access : target => {
+            target = (strcontains(target, "@")) ? "arn:aws:iam::024732177529:user/${target}" : "arn:aws:iam::024732177529:role/${target}"
+            policy = "AmazonEKSAdminViewPolicy"
+        }
+    }   
+
+    eks_access_information = merge(local.eks_admin_policy_target, {})
+}
+
+resource "aws_eks_access_entry" "this" {
+    for_each = local.eks_access_information
+
+    cluster_name = aws_eks_cluster.this.name 
+    principal_arn = each.value.target
+    type = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "this" {
+    for_each = local.eks_access_information
+
+    cluster_name = aws_eks_cluster.this.name 
+    policy_arn = "arn:aws:eks::aws:cluster-access-policy/${each.value.policy}"
+    principal_arn = aws_eks_access_entry.this[each.key].principal_arn
+
+    access_scope {
+        type = "cluster" # namespace 또는 cluster만 가능 
+    }
+}
