@@ -68,7 +68,7 @@ module "dev_bastion" {
 
   instance_security_groups = [module.dev_bastion_sg.sg_id]
 
-  # iam_instance_profile = ""
+  iam_instance_profile_policy = ["AmazonEKSWorkerNodePolicy"]  # default는 null
 } // module.dev_bastion
 
 
@@ -153,4 +153,30 @@ module "dev_eks" {
       attach_policy = ["service-role/AmazonEBSCSIDriverPolicy"]
     }
   } //cluster_addons
+
+  ## EKS Access 
+  eks_console_access = ["yrpark@ensmart.co.kr"]  # EKSAdminViewPolicy 부여
+  eks_cluster_access = [module.dev_bastion.bastion_ec2_role]  # AmazonEKSClusterAdminPolicy 부여
+
+  ## EKS Security Group Rule (Inbound)
+  eks_ingress_rules = {
+    "http_web" = {
+      from_port = 80 
+      to_port = 80
+      protocol = "tcp" 
+      cidrs = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+      security_groups = [module.dev_bastion_sg.sg_id]
+    }
+  } // eks_ingress_rules
+
+  ## EKS Security Group Rule (Outbound)
+  eks_egress_rules = {
+    "all" = {
+      from_port = 80
+      to_port = 80
+      protocol = "tcp" 
+      cidrs = ["172.16.0.0/12"]
+      # security_groups = []
+    }
+  } // eks_egress_rules
 }

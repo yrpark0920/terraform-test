@@ -122,3 +122,148 @@ resource "aws_eks_addon" "this" {
 
     configuration_values = each.value.configuration_values
 }
+
+############################# Add Access #############################
+/*
+> local.eks_access_information
+{
+  "bastion-ec2-role" = {
+    "policy" = "EKSClusterAdminPolicy"
+    "target" = "arn:aws:iam::024732177529:role/bastion-ec2-role"
+  }
+  "yrpark@ensmart.co.kr" = {
+    "policy" = "AmazonEKSAdminViewPolicy"
+    "target" = "arn:aws:iam::024732177529:user/yrpark@ensmart.co.kr"
+  }
+}
+*/
+locals {
+    eks_admin_policy_target = {
+        for target in var.eks_console_access : target => {
+            target = (strcontains(target, "@")) ? "arn:aws:iam::024732177529:user/${target}" : "arn:aws:iam::024732177529:role/${target}"
+            policy = "AmazonEKSAdminViewPolicy"
+        }
+    }   
+
+    eks_cluster_admin_policy_target = {
+      for target in var.eks_cluster_access : target => {
+        target = (strcontains(target, "@")) ? "arn:aws:iam::024732177529:user/${target}" : "arn:aws:iam::024732177529:role/${target}"
+        policy = "AmazonEKSClusterAdminPolicy"
+      }
+    }
+
+    eks_access_information = merge(local.eks_admin_policy_target, local.eks_cluster_admin_policy_target)
+}
+
+resource "aws_eks_access_entry" "this" {
+    for_each = local.eks_access_information
+
+    cluster_name = aws_eks_cluster.this.name 
+    principal_arn = each.value.target
+    type = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "this" {
+    for_each = local.eks_access_information
+
+    cluster_name = aws_eks_cluster.this.name 
+    policy_arn = "arn:aws:eks::aws:cluster-access-policy/${each.value.policy}"
+    principal_arn = aws_eks_access_entry.this[each.key].principal_arn
+
+    access_scope {
+        type = "cluster" # namespace 또는 cluster만 가능 
+    }
+}
+
+############################# Edit EKS Security Group Rule #############################
+locals {
+  ingress_cidr_block = merge([
+    for k, rule in var.eks_ingress_rules : {
+      for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        cidr_ipv4 = cidr 
+      }
+    }
+    if try(rule.cirs, null) != null
+  ]...) //local.ingress_cidr_block
+
+  ingress_security_group = merge([
+    for k, rule in var.eks_ingress_rules : {
+      for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        referenced_security_group_id = security_group_id
+      }
+    }
+    if try(rule.security_groups, null) != null
+  ]...) //local.ingress_security_group
+
+  egress_cidr_block = merge([
+    for k, rule in var.eks_egress_rules : {
+      for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        cidr_ipv4 = cidr 
+      }
+    }
+    if try(rule.cirs, null) != null
+  ]...) //local.egress_cidr_block
+
+  egress_security_group = merge([
+    for k, rule in var.eks_egress_rules : {
+      for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        referenced_security_group_id = security_group_id
+      }
+    }
+    if try(rule.security_groups, null) != null
+  ]...) //local.egress_security_group
+
+}
+## ---------------------Inbound----------------------------
+resource "aws_vpc_security_group_ingress_rule" "from_cidr" {
+    for_each = local.ingress_cidr_block
+
+    security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    cidr_ipv4 = lookup(each.value, "cidr_ipv4", null)
+}
+
+resource "aws_vpc_security_group_ingress_rule" "from_sg" {
+    for_each = local.ingress_security_group
+
+    security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
+}
+
+## ---------------------Outbound----------------------------
+resource "aws_vpc_security_group_egress_rule" "from_cidr" {
+    for_each = local.egress_cidr_block
+
+    security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    cidr_ipv4 = lookup(each.value, "cidr_ipv4", null)
+}
+
+resource "aws_vpc_security_group_egress_rule" "from_sg" {
+    for_each = local.egress_security_group
+
+    security_group_id = aws_eks_cluster.this.vpc_config[0].cluster_security_group_id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
+}

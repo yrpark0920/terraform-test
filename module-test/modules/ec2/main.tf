@@ -15,7 +15,7 @@ locals {
 
         instance_security_groups = var.instance_security_groups
 
-        iam_instance_profile = var.iam_instance_profile
+        iam_instance_profile = (var.iam_instance_profile_policy != null) ? aws_iam_instance_profile.bastion_profile.name : null
     }]
 
     instance_flat = flatten([
