@@ -94,3 +94,26 @@ variable "eks_cluster_access" {
     description = "EKS 클러스터에 액세스 할 수 있도록 EKSClusterAdminPolicy 권한 부여할 계정 정보 또는 IAM Role 입력"
     type = list(string)
 }
+
+############################# Edit EKS Security Group Rule #############################
+variable "eks_ingress_rules" {
+    description = "EKS 클러스터 보안그룹 인바운드 규칙에 추가할 대상"
+    type = map(object({
+        from_port = number 
+        to_port = number 
+        protocol = string 
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
+    }))
+}
+
+variable "eks_egress_rules" {
+    description = "EKS 클러스터 보안그룹 아웃바운드 규칙에 추가할 대상"
+    type = map(object({
+        from_port = number 
+        to_port = number
+        protocol = string 
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
+    }))
+}
