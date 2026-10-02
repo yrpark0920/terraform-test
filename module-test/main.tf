@@ -93,8 +93,6 @@ module "dev_bastion_sg" {
   ## 아웃바운드 규칙 설정
   sg_egress_rules = {
     "outbound_default" = {
-      from_port = 0
-      to_port = 0
       protocol = -1
       cidr_blocks = ["0.0.0.0/0"]
     }
