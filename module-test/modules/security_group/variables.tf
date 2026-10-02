@@ -21,8 +21,8 @@ variable "sg_ingress_rules" {
         from_port = number
         to_port = number
         protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
     })
     )
 }
@@ -33,8 +33,8 @@ variable "sg_egress_rules" {
         from_port = number
         to_port = number
         protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
     })
     )
 }
