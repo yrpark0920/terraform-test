@@ -85,8 +85,8 @@ module "dev_bastion_sg" {
       from_port = 80
       to_port = 80
       protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      # source_security_group_id = []
+      cidrs = ["0.0.0.0/0"]
+      # security_groups = []
     }
   }
 
@@ -102,7 +102,7 @@ module "dev_bastion_sg" {
 } //module.dev_bastion_sg
 
 module "dev_eks" {
-  source "./modules/eks"
+  source = "./modules/eks"
   subnet_ids = module.dev_vpc.subnet_ids 
 
   ## Cluster 변수 설정
@@ -179,4 +179,14 @@ module "dev_eks" {
       # security_groups = []
     }
   } // eks_egress_rules
+}
+
+module "dev_rds" {
+  source = "./modules/rds"
+  subnet_ids = module.dev_vpc.subnet_ids
+  
+  rds_name = "yrpark_dev_rds"
+  rds_subnet = "yrpark_db_subnet"
+  rds_subnet_az = ["a"]
+
 }
