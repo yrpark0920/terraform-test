@@ -25,6 +25,7 @@ variable "sg_ingress_rules" {
         security_groups = optional(list(string))
     })
     )
+    default = null
 }
 
 variable "sg_egress_rules" {
@@ -37,4 +38,5 @@ variable "sg_egress_rules" {
         security_groups = optional(list(string))
     })
     )
+    default = null 
 }

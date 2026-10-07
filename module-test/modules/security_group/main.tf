@@ -12,7 +12,7 @@ resource "aws_security_group" "this" {
 ############################ Add Rules in Security Group ############################
 locals {
   ingress_cidr_block = merge([
-    for k, rule in var.sg_ingress_rules : {
+    for k, rule in coalesce(var.sg_ingress_rules, {}) : {
       for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
         from_port = rule.from_port 
         to_port = rule.to_port 
@@ -24,7 +24,7 @@ locals {
   ]...) //local.ingress_cidr_block
 
   ingress_security_group = merge([
-    for k, rule in var.sg_ingress_rules : {
+    for k, rule in coalesce(var.sg_ingress_rules, {}) : {
       for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
         from_port = rule.from_port 
         to_port = rule.to_port 
@@ -36,7 +36,7 @@ locals {
   ]...) //local.ingress_security_group
 
   egress_cidr_block = merge([
-    for k, rule in var.sg_egress_rules : {
+    for k, rule in coalesce(var.sg_egress_rules, {}) : {
       for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
         from_port = rule.from_port 
         to_port = rule.to_port 
@@ -48,7 +48,7 @@ locals {
   ]...) //local.egress_cidr_block
 
   egress_security_group = merge([
-    for k, rule in var.sg_egress_rules : {
+    for k, rule in coalesce(var.sg_egress_rules, {}) : {
       for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
         from_port = rule.from_port 
         to_port = rule.to_port 
