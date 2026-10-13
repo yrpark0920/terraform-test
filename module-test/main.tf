@@ -179,12 +179,51 @@ module "dev_eks" {
   } // eks_egress_rules
 }
 
-module "dev_rds" {
+module "dev_rds_master" {
   source = "./modules/rds"
   subnet_ids = module.dev_vpc.subnet_ids
   
   rds_name = "yrpark_dev_rds"
-  rds_subnet = "yrpark_db_subnet"
-  rds_subnet_az = ["a"]
+  rds_subnet = "yrpark_eks_subnet"
+  rds_subnet_az = ["a", "b"]
+  rds_family = "mysql8.0"
+  rds_parameter_group_content = {
+    "character_set_server" = "utf8" 
+    "character_set_client" = "utf8"
+  }
+
+  ## Instance 생성
+  instance_class = "db.t3.micro"
+  engine = "mysql"
+  engine_version = "8.0.45"
+  storage_type = "gp3"
+  allocated_storage = 20
+  db_name = "yrpark_db" 
+  username = "yrpark"
+  password = "yrpark@pw"
+  multi_az = true 
+  vpc_security_group_ids = [module.dev_rds_sg.sg_id]
 
 }
+
+module "dev_rds_sg" {
+  source = "./modules/security_group"
+  vpc_id = module.dev_vpc.vpc_id
+
+  security_group_name = "yrpark_dev_rds_sg"
+  #security_group_description = ""
+
+  ## 인바운드 규칙 설정
+  sg_ingress_rules = {
+    "rds" = {
+      from_port = 3306
+      to_port = 3306
+      protocol = "tcp"
+      # cidrs = ["0.0.0.0/0"]
+      security_groups = [module.dev_eks.sg_id]
+    }
+  }
+
+  ## 아웃바운드 규칙 설정
+  
+} //module.dev_rds_sg
