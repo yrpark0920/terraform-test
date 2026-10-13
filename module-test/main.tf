@@ -203,7 +203,6 @@ module "dev_rds_master" {
   password = "yrpark@pw"
   multi_az = true 
   vpc_security_group_ids = [module.dev_rds_sg.sg_id]
-
 }
 
 module "dev_rds_sg" {

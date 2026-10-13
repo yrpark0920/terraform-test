@@ -49,7 +49,7 @@ variable "engine_version" {
     type = string 
 }
 
-variable "iops" {
+variable "storage_type" {
     description = "DB 스토리지 유형"
     type = string 
 }

@@ -38,7 +38,7 @@ resource "aws_db_instance" "master" {
     engine = var.engine
     engine_version = var.engine_version
     instance_class = var.instance_class
-    iops = var.iops
+    storage_type = var.storage_type
     allocated_storage = var.allocated_storage
     db_subnet_group_name = aws_db_subnet_group.this.name
     parameter_group_name = aws_db_parameter_group.this.name
