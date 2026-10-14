@@ -84,3 +84,9 @@ variable "vpc_security_group_ids" {
     description = "RDS 보안 그룹 지정"
     type = list(string)
 }
+
+variable "backup_retention_period" {
+    description = "백업 보존 기간 설정"
+    type = number 
+    default = 1
+}

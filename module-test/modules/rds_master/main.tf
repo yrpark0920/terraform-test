@@ -51,5 +51,8 @@ resource "aws_db_instance" "master" {
 
     skip_final_snapshot = true 
     auto_minor_version_upgrade = false 
+    backup_retention_period = var.backup_retention_period
+
+    apply_immediately = true
 
 }

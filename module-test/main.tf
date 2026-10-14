@@ -180,7 +180,7 @@ module "dev_eks" {
 }
 
 module "dev_rds_master" {
-  source = "./modules/rds"
+  source = "./modules/rds_master"
   subnet_ids = module.dev_vpc.subnet_ids
   
   rds_name = "yrpark_dev_rds"
@@ -203,6 +203,17 @@ module "dev_rds_master" {
   password = "yrpark@pw"
   multi_az = true 
   vpc_security_group_ids = [module.dev_rds_sg.sg_id]
+  #backup_retention_period
+}
+
+
+module "dev_rds_replica" {
+  source = "./modules/rds_replica"
+  
+  rds_replica_name = "yrpark_dev_rds_replica"
+  replicate_source_db = module.dev_rds_master.identifier
+  instance_class = "db.t3.small"
+
 }
 
 module "dev_rds_sg" {
