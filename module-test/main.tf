@@ -209,11 +209,19 @@ module "dev_rds_master" {
 
 module "dev_rds_replica" {
   source = "./modules/rds_replica"
+
+  /* 다른 리전에 복제본 만들 때 사용 
+  subnet_ids = module.dev_vpc.subnet_ids
+  rds_subnet = "yrpark_eks_subnet"
+  rds_subnet_az = ["a", "b"]
+  */
   
+  #replica_mode 
   rds_replica_name = "yrpark_dev_rds_replica"
   replicate_source_db = module.dev_rds_master.identifier
   instance_class = "db.t3.small"
-
+  storage_type = "gp3"
+  allocated_storage = 25
 }
 
 module "dev_rds_sg" {
