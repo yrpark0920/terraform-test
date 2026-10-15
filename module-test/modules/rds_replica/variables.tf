@@ -16,7 +16,7 @@ variable "rds_subnet_az" {
     default = null
 
     validation {
-        condition = length(var.rds_subnet_az) > 1
+        condition = var.rds_subnet_az == null ? true : length(var.rds_subnet_az) > 1
         error_message = "2개 이상의 서로 다른 AZ를 지정해야합니다."
     }
 }

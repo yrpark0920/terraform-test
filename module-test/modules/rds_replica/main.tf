@@ -23,7 +23,7 @@ resource "aws_db_instance" "replica" {
     replicate_source_db = var.replicate_source_db
     replica_mode = var.replica_mode
 
-    identifier = var.rds_replica_name
+    identifier = replace(var.rds_replica_name, "_", "-")
     instance_class = var.instance_class
     db_subnet_group_name = var.subnet_ids != null ? aws_db_subnet_group.this[0].name : null 
     storage_type = var.storage_type
