@@ -85,16 +85,14 @@ module "dev_bastion_sg" {
       from_port = 80
       to_port = 80
       protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      # source_security_group_id = []
+      cidrs = ["0.0.0.0/0"]
+      # security_groups = []
     }
   }
 
   ## 아웃바운드 규칙 설정
   sg_egress_rules = {
     "outbound_default" = {
-      from_port = 0
-      to_port = 0
       protocol = -1
       cidr_blocks = ["0.0.0.0/0"]
     }
@@ -102,7 +100,7 @@ module "dev_bastion_sg" {
 } //module.dev_bastion_sg
 
 module "dev_eks" {
-  source "./modules/eks"
+  source = "./modules/eks"
   subnet_ids = module.dev_vpc.subnet_ids 
 
   ## Cluster 변수 설정
@@ -180,3 +178,70 @@ module "dev_eks" {
     }
   } // eks_egress_rules
 }
+
+module "dev_rds_master" {
+  source = "./modules/rds_master"
+  subnet_ids = module.dev_vpc.subnet_ids
+  
+  rds_name = "yrpark_dev_rds"
+  rds_subnet = "yrpark_eks_subnet"
+  rds_subnet_az = ["a", "b"]
+  rds_family = "mysql8.0"
+  rds_parameter_group_content = {
+    "character_set_server" = "utf8" 
+    "character_set_client" = "utf8"
+  }
+
+  ## Instance 생성
+  instance_class = "db.t3.micro"
+  engine = "mysql"
+  engine_version = "8.0.45"
+  storage_type = "gp3"
+  allocated_storage = 20
+  db_name = "yrpark_db" 
+  username = "yrpark"
+  password = "yrpark@pw"
+  multi_az = true 
+  vpc_security_group_ids = [module.dev_rds_sg.sg_id]
+  #backup_retention_period
+}
+
+
+module "dev_rds_replica" {
+  source = "./modules/rds_replica"
+
+  /* 다른 리전에 복제본 만들 때 사용 
+  subnet_ids = module.dev_vpc.subnet_ids
+  rds_subnet = "yrpark_eks_subnet"
+  rds_subnet_az = ["a", "b"]
+  */
+  
+  #replica_mode 
+  rds_replica_name = "yrpark_dev_rds_replica"
+  replicate_source_db = module.dev_rds_master.identifier
+  instance_class = "db.t3.small"
+  storage_type = "gp3"
+  allocated_storage = 25
+}
+
+module "dev_rds_sg" {
+  source = "./modules/security_group"
+  vpc_id = module.dev_vpc.vpc_id
+
+  security_group_name = "yrpark_dev_rds_sg"
+  #security_group_description = ""
+
+  ## 인바운드 규칙 설정
+  sg_ingress_rules = {
+    "rds" = {
+      from_port = 3306
+      to_port = 3306
+      protocol = "tcp"
+      # cidrs = ["0.0.0.0/0"]
+      security_groups = [module.dev_eks.sg_id]
+    }
+  }
+
+  ## 아웃바운드 규칙 설정
+  
+} //module.dev_rds_sg

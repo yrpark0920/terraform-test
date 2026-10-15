@@ -11,25 +11,92 @@ resource "aws_security_group" "this" {
 
 ############################ Add Rules in Security Group ############################
 locals {
-    ingress_rules = {
-        for k,v in var.sg_ingress_rules : k => merge(v, {type = "ingress"})
+  ingress_cidr_block = merge([
+    for k, rule in coalesce(var.sg_ingress_rules, {}) : {
+      for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        cidr_ipv4 = cidr 
+      }
     }
-    egress_rules = {
-        for k,v in var.sg_egress_rules : k => merge(v, {type = "egress"})
-    }
+    if try(rule.cidrs, null) != null
+  ]...) //local.ingress_cidr_block
 
-    security_group_rule_information = merge(local.ingress_rules, local.egress_rules)
+  ingress_security_group = merge([
+    for k, rule in coalesce(var.sg_ingress_rules, {}) : {
+      for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        referenced_security_group_id = security_group_id
+      }
+    }
+    if try(rule.security_groups, null) != null
+  ]...) //local.ingress_security_group
+
+  egress_cidr_block = merge([
+    for k, rule in coalesce(var.sg_egress_rules, {}) : {
+      for idx, cidr in try(rule.cidrs, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        cidr_ipv4 = cidr 
+      }
+    }
+    if try(rule.cidrs, null) != null
+  ]...) //local.egress_cidr_block
+
+  egress_security_group = merge([
+    for k, rule in coalesce(var.sg_egress_rules, {}) : {
+      for idx, security_group_id in try(rule.security_groups, []) : "${k}_${idx}" => {
+        from_port = rule.from_port 
+        to_port = rule.to_port 
+        ip_protocol = rule.protocol 
+        referenced_security_group_id = security_group_id
+      }
+    }
+    if try(rule.security_groups, null) != null
+  ]...) //local.egress_security_group
+}
+## ---------------------Inbound----------------------------
+resource "aws_vpc_security_group_ingress_rule" "from_cidr" {
+    for_each = local.ingress_cidr_block
+
+    security_group_id = aws_security_group.this.id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    cidr_ipv4 = lookup(each.value, "cidr_ipv4", null)
 }
 
-resource "aws_security_group_rule" "this" {
-    for_each = local.security_group_rule_information
+resource "aws_vpc_security_group_ingress_rule" "from_sg" {
+    for_each = local.ingress_security_group
 
-    security_group_id = aws_security_group.this.id 
-
-    type = each.value.type 
+    security_group_id = aws_security_group.this.id
     from_port = each.value.from_port
-    to_port = each.value.to_port 
-    protocol = each.value.protocol
-    cidr_blocks = lookup(each.value, "cidr_blocks", null)
-    source_security_group_id = lookup(each.value, "source_security_group_id", null)
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
+}
+
+## ---------------------Outbound----------------------------
+resource "aws_vpc_security_group_egress_rule" "from_cidr" {
+    for_each = local.egress_cidr_block
+
+    security_group_id = aws_security_group.this.id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    cidr_ipv4 = lookup(each.value, "cidr_ipv4", null)
+}
+
+resource "aws_vpc_security_group_egress_rule" "from_sg" {
+    for_each = local.egress_security_group
+
+    security_group_id = aws_security_group.this.id
+    from_port = each.value.from_port
+    to_port = each.value.to_port
+    ip_protocol = each.value.ip_protocol
+    referenced_security_group_id = lookup(each.value, "referenced_security_group_id", null)
 }

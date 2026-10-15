@@ -18,23 +18,25 @@ variable "security_group_description" {
 variable "sg_ingress_rules" {
     description = "보안그룹에 추가할 인바운드 목록"
     type = map(object({
-        from_port = number
-        to_port = number
+        from_port = optional(number)
+        to_port = optional(number)
         protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
     })
     )
+    default = null
 }
 
 variable "sg_egress_rules" {
     description = "보안그룹에 추가할 아웃바운드 목록"
     type = map(object({
-        from_port = number
-        to_port = number
+        from_port = optional(number)
+        to_port = optional(number)
         protocol = string 
-        cidr_blocks = optional(list(string))
-        source_security_group_id = optional(string)
+        cidrs = optional(list(string))
+        security_groups = optional(list(string))
     })
     )
+    default = null 
 }
